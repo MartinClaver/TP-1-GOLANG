@@ -32,51 +32,62 @@ func AddContact(contactMap *map[int]Contact) {
 		}
 	}
 
-	(*contactMap)[newID] = Contact{ID: newID, Nom: nom, Email: email}
-	fmt.Println("Contact ajouté avec succès !")
+	(*contactMap)[newID] = Contact{Nom: nom, Email: email}
+	fmt.Println("Contact ajouté avec succès ! \n")
 }
 
-func ShowContactMap(contactMap map[int]Contact) map[int]Contact {
-	return contactMap
+func ShowContactMap(contactMap map[int]Contact) {
+	for id, contact := range contactMap {
+		fmt.Printf("ID: %d, Nom: %s, Email: %s\n", id, contact.Nom, contact.Email)
+	}
 }
 
 func DeleteContactMap(contactMap *map[int]Contact) {
 	reader := bufio.NewReader(os.Stdin)
 
 	fmt.Print("Entrer l'ID du contact : ")
-	id, err := reader.ReadString('\n')
+	input, err := reader.ReadString('\n')
 	if err != nil {
 		fmt.Println(fmt.Errorf("Erreur de lecture de l'id : %v", err))
 	}
-	choix, _ := strconv.Atoi(strings.TrimSpace(id))
-	delete(*contactMap, choix)
+	id, _ := strconv.Atoi(strings.TrimSpace(input))
+
+	if _, ok := (*contactMap)[id]; ok {
+		delete(*contactMap, id)
+		fmt.Println("Contact supprimé avec succès ! \n")
+	} else {
+		fmt.Println("L'ID n'existe pas ! \n")
+	}
 }
 
 func UpdateContactMap(contactMap *map[int]Contact) {
 	reader := bufio.NewReader(os.Stdin)
 
 	fmt.Print("Entrer l'ID du contact : ")
-	id, err := reader.ReadString('\n')
+	input, err := reader.ReadString('\n')
 	if err != nil {
 		fmt.Println(fmt.Errorf("Erreur de lecture de l'id : %v", err))
 	}
-	choix, _ := strconv.Atoi(strings.TrimSpace(id))
+	id, _ := strconv.Atoi(strings.TrimSpace(input))
 
-	fmt.Print("Entrer le nom du contact : ")
-	nom, err := reader.ReadString('\n')
-	if err != nil {
-		fmt.Println(fmt.Errorf("Erreur de lecture du nom : %v", err))
+	if _, ok := (*contactMap)[id]; ok {
+		fmt.Print("Entrer le nom du contact : ")
+		nom, err := reader.ReadString('\n')
+		if err != nil {
+			fmt.Println(fmt.Errorf("Erreur de lecture du nom : %v", err))
+		}
+		nom = strings.TrimSpace(nom)
+
+		fmt.Print("Entrer l'email du contact : ")
+		email, err := reader.ReadString('\n')
+		if err != nil {
+			fmt.Println(fmt.Errorf("Erreur de lecture de l'email : %v", err))
+		}
+		email = strings.TrimSpace(email)
+
+		(*contactMap)[id] = Contact{Nom: nom, Email: email}
+		fmt.Println("Contact modifié avec succès ! \n")
+	} else {
+		fmt.Println("L'ID n'existe pas ! \n")
 	}
-	nom = strings.TrimSpace(nom)
-
-	fmt.Print("Entrer l'email du contact : ")
-	email, err := reader.ReadString('\n')
-	if err != nil {
-		fmt.Println(fmt.Errorf("Erreur de lecture de l'email : %v", err))
-	}
-	email = strings.TrimSpace(email)
-
-	(*contactMap)[choix] = Contact{ID: choix, Nom: nom, Email: email}
-	fmt.Println("Contact modifié avec succès !")
-
 }
