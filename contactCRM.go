@@ -2,8 +2,10 @@ package main
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 )
@@ -32,7 +34,12 @@ func AddContact(contactMap *map[int]Contact) {
 		}
 	}
 
-	(*contactMap)[newID] = Contact{Nom: nom, Email: email}
+	contact, err := NewContact(nom, email)
+	if err != nil {
+		fmt.Println("Erreur lors de la création du contact :", err)
+		return
+	}
+	(*contactMap)[newID] = contact
 	fmt.Println("Contact ajouté avec succès ! \n")
 }
 
@@ -90,4 +97,21 @@ func UpdateContactMap(contactMap *map[int]Contact) {
 	} else {
 		fmt.Println("L'ID n'existe pas ! \n")
 	}
+}
+
+func NewContact(nom, email string) (Contact, error) {
+	nom = strings.TrimSpace(nom)
+	email = strings.TrimSpace(email)
+
+	if nom == "" {
+		return Contact{}, errors.New("le nom ne peut pas être vide")
+	}
+
+	// Validation simple de l'email (format basique)
+	emailRegex := regexp.MustCompile(`^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$`)
+	if !emailRegex.MatchString(email) {
+		return Contact{}, errors.New("email invalide")
+	}
+
+	return Contact{Nom: nom, Email: email}, nil
 }
