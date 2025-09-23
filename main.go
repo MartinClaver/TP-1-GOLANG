@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"flag"
 	"fmt"
 	"os"
 	"strconv"
@@ -17,7 +18,16 @@ type Contact struct {
 
 func main() {
 	contactMap := make(map[int]Contact)
+
+	nameflag := flag.String("nom", "", "Nom du contact")
+	emailflag := flag.String("email", "", "Email du contact")
+
+	flag.Parse()
 	for {
+		if *nameflag != "" && *emailflag != "" {
+			contact := Contact{*nameflag, *emailflag}
+			(contactMap)[1] = contact
+		}
 		reader := bufio.NewReader(os.Stdin)
 		fmt.Println("Hello ! Bienvenue dans un Mini-CRM pour gérer tes contacts. Tape un des chiffres suivants pour effectuer une action")
 		fmt.Println("1. Ajouter un contact")
