@@ -14,4 +14,8 @@ Pour exécuter le projet dans le terminal :
 
 3- Suivre les indications dans le terminal
 
+LANCEMENT AVEC FLAG
+Utiliser la commande `go run . --nom NOM --email EMAIL`
+
+
 
