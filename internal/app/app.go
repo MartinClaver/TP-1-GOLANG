@@ -1,94 +1,18 @@
-package main
+package app
 
 import (
+	"awesomeProject/internal/storage"
 	"bufio"
-	"errors"
 	"fmt"
 	"os"
 	"strconv"
 	"strings"
 )
 
-// Contact est notre structure de données centrale
-type Contact struct {
-	ID    int
-	Name  string
-	Email string
-}
-
-// Storer est un CONTRAT de stockage
-// Il définit un ensemble de comportements (méthodes) que tout type
-// de stockage doit respecter. On ne se soucie par du comment c'est fait
-// (en mémoire, fichier, BDD...) seulement de ce qui peut être fait
-type Storer interface {
-	Add(contact *Contact) error
-	GetAll() ([]*Contact, error)
-	GetByID(id int) (*Contact, error)
-	Update(id int, newName, newEmail string) error
-	Delete(id int) error
-}
-
-type MemoryStore struct {
-	contacts map[int]*Contact
-	nextID   int
-}
-
-// NewMemoryStore est un constructeur qui initialise proprement notre storer
-func NewMemoryStore() *MemoryStore {
-	return &MemoryStore{
-		contacts: make(map[int]*Contact),
-		nextID:   1,
-	}
-}
-
-func (ms *MemoryStore) Add(contact *Contact) error {
-	contact.ID = ms.nextID
-	ms.contacts[contact.ID] = contact
-	ms.nextID++
-	return nil
-}
-
-func (ms *MemoryStore) GetAll() ([]*Contact, error) {
-	var allContacts []*Contact
-	for _, c := range ms.contacts {
-		allContacts = append(allContacts, c)
-	}
-	return allContacts, nil
-}
-
-func (ms *MemoryStore) GetByID(id int) (*Contact, error) {
-	contact, ok := ms.contacts[id]
-	if !ok {
-		return nil, errors.New("Contact not found")
-	}
-	return contact, nil
-}
-
-func (ms *MemoryStore) Update(id int, newName, newEmail string) error {
-	contact, err := ms.GetByID(id)
-	if err != nil {
-		return err
-	}
-	if newName != "" {
-		contact.Name = newName
-	}
-	if newEmail != "" {
-		contact.Email = newEmail
-	}
-	return nil
-}
-
-func (ms *MemoryStore) Delete(id int) error {
-	if _, ok := ms.contacts[id]; !ok {
-		return errors.New("Contact not found")
-	}
-	delete(ms.contacts, id)
-	return nil
-}
-
-func main() {
-
-	var store Storer = NewMemoryStore()
+// Les fonctions "handle..." s'occupent de l'interaction avec l'utilisateur
+// et elles appellent la couche de stockage (store) pour effectuer les opérations.
+// Elles sont découplées du stockage : elles fonctionnent avec n'importe quel storer
+func Run(store storage.Storer) {
 	reader := bufio.NewReader(os.Stdin)
 
 	fmt.Println("Welcome to the Mini CRM v3!")
@@ -122,19 +46,14 @@ func main() {
 		}
 	}
 }
-
-// Les fonctions "handle..." s'occupent de l'interaction avec l'utilisateur
-// et elles appellent la couche de stockage (store) pour effectuer les opérations.
-// Elles sont découplées du stockage : elles fonctionnent avec n'importe quel storer
-
-func handleAddContact(reader *bufio.Reader, storer Storer) {
+func handleAddContact(reader *bufio.Reader, storer storage.Storer) {
 	fmt.Print("Enter contact name: ")
 	name := readLine(reader)
 
 	fmt.Print("Enter contact email: ")
 	email := readLine(reader)
 
-	contact := &Contact{
+	contact := &storage.Contact{
 		Name:  name,
 		Email: email,
 	}
@@ -146,7 +65,7 @@ func handleAddContact(reader *bufio.Reader, storer Storer) {
 	fmt.Printf("Contact '%s' added with ID %d.\n", contact.Name, contact.ID)
 }
 
-func handleListContacts(store Storer) {
+func handleListContacts(store storage.Storer) {
 	contacts, err := store.GetAll()
 	if err != nil {
 		fmt.Printf("Error: %v\n", err)
@@ -164,7 +83,7 @@ func handleListContacts(store Storer) {
 	}
 }
 
-func handleUpdateContact(reader *bufio.Reader, store Storer) {
+func handleUpdateContact(reader *bufio.Reader, store storage.Storer) {
 	fmt.Print("Enter the ID of the contact to update: ")
 	id := readInteger(reader)
 	if id == -1 {
@@ -195,7 +114,7 @@ func handleUpdateContact(reader *bufio.Reader, store Storer) {
 	fmt.Println("Contact updated successfully.")
 }
 
-func handleDeleteContact(reader *bufio.Reader, store Storer) {
+func handleDeleteContact(reader *bufio.Reader, store storage.Storer) {
 	fmt.Print("Enter the ID of the contact to delete: ")
 	id := readInteger(reader)
 	if id == -1 {
