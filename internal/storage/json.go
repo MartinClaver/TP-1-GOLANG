@@ -12,7 +12,6 @@ type JsonStore struct {
 }
 
 func (j JsonStore) Add(c *Contact) {
-	jsonFile := j.GetAll()
 	data, err := json.MarshalIndent(c, "", "    ")
 	if err != nil {
 		fmt.Println("Erreur lors de l'ajout :", err)
