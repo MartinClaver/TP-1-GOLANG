@@ -1,0 +1,6 @@
+storage:
+  type: gorm        # gorm | json | memory
+  gorm:
+    path: data/contacts.db
+  json:
+    path: data/contacts.json
